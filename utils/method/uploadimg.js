@@ -10,7 +10,6 @@ export default async function uploadImg({ img }) {
       url: "https://api.imgur.com/3/image",
       headers: {
         Authorization: `Client-ID a4b77fdc42f4140`,
-        ...body.getHeaders(),
       },
     });
     return res;
