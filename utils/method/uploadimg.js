@@ -9,7 +9,7 @@ export default async function uploadImg({ img }) {
       body: body,
       url: "https://api.imgur.com/3/image",
       headers: {
-        Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}`,
+        Authorization: `Client-ID a4b77fdc42f4140`,
         "Content-Type": "multipart/form-data",
       },
     });
