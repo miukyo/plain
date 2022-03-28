@@ -64,7 +64,7 @@ const Upload = () => {
       let data = await uploadImg({
         img: preUpload.img,
       });
-      console.log(data);
+      // console.log(data);
       // if (data.status) {
       //   ToastLoading("Finishing...", { id: "Uploading" });
       //   let upload = {
