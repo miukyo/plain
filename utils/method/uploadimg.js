@@ -1,9 +1,13 @@
 import axios from "axios";
 
-export default async function uploadImg({ img }) {
+export default async function uploadImg({ img, vid }) {
   try {
     const body = new FormData();
-    body.append("image", img);
+    if (img) {
+      body.append("image", img);
+    } else if (vid) {
+      body.append("video", vid);
+    }
     const res = await axios({
       method: "post",
       data: body,

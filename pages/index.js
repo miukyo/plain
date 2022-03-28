@@ -3,6 +3,7 @@ import "@fontsource/poppins";
 import { Homepage } from "../components/Homepage/Homepage";
 import { Navbar } from "../components/Homepage/Navbar";
 import { Toaster } from "react-hot-toast";
+import axios from "axios";
 
 export default function Home({ posts }) {
   return (
@@ -24,7 +25,10 @@ export async function getServerSideProps(ctx) {
   let dev = process.env.NODE_ENV !== "production";
   let { DEV_URL, PROD_URL } = process.env;
 
-  let response = await fetch(`${dev ? DEV_URL : PROD_URL}/api/posts`);
+  let response = await axios({
+    method: "get",
+    url: `${dev ? DEV_URL : PROD_URL}/api/posts`,
+  });
   let data = await response.json();
 
   return {

@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useRef } from "react";
 import Router from "next/router";
+import axios  from "axios";
 import {
   BsThreeDots,
   BsPlus,
@@ -28,104 +29,141 @@ const Upload = () => {
     value: null,
     state: false,
   });
+  const [formWarn, setFormWarn] = useState({
+    name: false,
+    category: false,
+    img: false,
+  });
   const [convertImg, setConvertImg] = useState({
     img: null,
+    vid: null,
     preview: null,
   });
   const [preUpload, setPreUpload] = useState({
     name: "",
     img: null,
+    vid: null,
     description: "",
   });
   const onDrop = useCallback((e) => {
     const file = e[0];
     const reader = new FileReader();
+    setFormWarn({ ...formWarn, img: false });
     reader.onload = (e) => {
-      setConvertImg({
-        img: e.target.result,
-        preview: URL.createObjectURL(file),
-      });
       const base = e.target.result;
-      setPreUpload({
-        ...preUpload,
-        img: base.replace(/^data:image\/[a-z]+;base64,/, ""),
-      });
+      if (base.indexOf("image") !== -1) {
+        setPreUpload({
+          ...preUpload,
+          img: base.replace(/^data:image\/[a-z]+;base64,/, ""),
+        });
+        setConvertImg({
+          img: e.target.result,
+          preview: URL.createObjectURL(file),
+        });
+      } else {
+        setConvertImg({
+          vid: e.target.result,
+          preview: URL.createObjectURL(file),
+        });
+        setPreUpload({
+          ...preUpload,
+          vid: base.replace(/^data:video\/[a-z]+;base64,/, ""),
+        });
+      }
     };
     reader.readAsDataURL(file);
   });
   const handleUpload = async () => {
     if (
-      (preUpload.img !== null) &
-      (preUpload.name.length > 3 < 100) &
-      (preUpload.description.length > 5)
+      (convertImg.preview !== null) &
+      (preUpload.name.length > 3 && preUpload.name.length < 100) &
+      (category.value !== null) &
+      (session !== null)
     ) {
       ToastLoading("Uploading...", { id: "Uploading" });
       let data = await uploadImg({
         img: preUpload.img,
+        vid: preUpload.vid,
       });
-      // console.log(data);
-      // if (data.status) {
-      //   ToastLoading("Finishing...", { id: "Uploading" });
-      //   let upload = {
-      //     img: data.data,
-      //     name: preUpload.name,
-      //     description: preUpload.description,
-      //     category: category.value,
-      //     author: session?.user.name,
-      //     likes: 0,
-      //     views: 0,
-      //     createdAt: new Date().toISOString(),
-      //   };
-      //   let final = await fetch("/api/posts", {
-      //     method: "POST",
-      //     body: JSON.stringify(upload),
-      //   })
-      //     .then((res) => res.json())
-      //     .then((res) => {
-      //       return res;
-      //     });
-      //   if (final.success) {
-      //     ToastSuccess("Uploaded", { id: "Uploading" });
-      //     Router.push("/");
-      //   } else {
-      //     ToastErr("Upload Failed (internal error)", { id: "Uploading" });
-      //   }
-      // } else {
-      //   ToastErr("Upload Failed (internal error)", { id: "Uploading" });
-      // }
+      if (data.status) {
+        ToastLoading("Finishing...", { id: "Uploading" });
+        let upload = {
+          file: data.data,
+          name: preUpload.name,
+          description: preUpload.description,
+          category: category.value,
+          author: session?.user.name,
+          likes: 0,
+          views: 0,
+          createdAt: new Date().toISOString(),
+        };
+        let final = await axios({
+          method: "POST",
+          url: "/api/posts",
+          data: JSON.stringify(upload),
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            return res;
+          });
+        if (final.success) {
+          ToastSuccess("Uploaded", { id: "Uploading" });
+          Router.push("/");
+        } else {
+          ToastErr("Upload Failed (internal error)", { id: "Uploading" });
+        }
+      } else {
+        ToastErr("Upload Failed (internal error)", { id: "Uploading" });
+      }
     } else {
-      return ToastErr("Please fill all the fields", { id: "Uploading" });
+      if (convertImg.preview == null) {
+        ToastErr("Please insert an image or video!", { id: "Uploading" });
+        setFormWarn({ ...formWarn, img: true });
+      } else if (preUpload.name.length < 3 || preUpload.name.length > 100) {
+        ToastErr("Please insert the title between 3 to 100 character!", {
+          id: "Uploading",
+        });
+        setFormWarn({ ...formWarn, name: true });
+      } else if (category.value == null) {
+        ToastErr("Please select the category!", { id: "Uploading" });
+        setFormWarn({ ...formWarn, category: true });
+      } else if (session == null) {
+        ToastErr("Authentication Error", { id: "Uploading" });
+      }
     }
   };
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: "image/jpeg,image/png",
+    accept: "image/*,video/*",
     maxFiles: 1,
-    noClick: convertImg.img ? true : false,
+    noClick: convertImg.preview ? true : false,
   });
   const handleClear = () => {
     setConvertImg({
       img: null,
+      vid: null,
       preview: null,
     });
     setPreUpload({
       ...preUpload,
+      vid: null,
       img: null,
     });
   };
-  const handleClearInput = () => {
-    setConvertImg({
-      img: null,
-      preview: null,
-    });
-    setPreUpload({
-      name: "",
-      img: null,
-      description: "",
-      author: session?.user.name,
-    });
-  };
-  console.log(preUpload);
+  // const handleClearInput = () => {
+  //   setConvertImg({
+  //     img: null,
+  //     vid: null,
+  //     preview: null,
+  //   });
+  //   setPreUpload({
+  //     name: "",
+  //     img: null,
+  //     description: "",
+  //     author: session?.user.name,
+  //   });
+  // };
+  // console.log(preUpload);
   return (
     <div className='mt-[5rem] py-12 px-16 relative overflow-y-visible'>
       <div className='flex w-full justify-center'>
@@ -152,16 +190,27 @@ const Upload = () => {
             <div
               {...getRootProps()}
               className={`${
-                !convertImg.img && "bg-gray-300 dark:bg-gray-700"
+                !convertImg.preview && "bg-gray-300 dark:bg-gray-700"
+              } ${
+                formWarn.img ? "border-red-500 border" : ""
               } relative w-[35rem] h-[40rem]  rounded-xl flex justify-center items-center overflow-hidden`}>
-              {convertImg.img && (
-                <img
-                  className='absolute w-full opacity-100 rounded-xl'
-                  src={convertImg.preview}
-                />
-              )}
+              {convertImg.preview &&
+                (convertImg.img ? (
+                  <img
+                    className='absolute w-full rounded-xl'
+                    src={convertImg.preview}
+                  />
+                ) : (
+                  <video
+                    loop={true}
+                    autoPlay={true}
+                    muted={true}
+                    className='absolute w-full rounded-xl'
+                    src={convertImg.preview}
+                  />
+                ))}
               <input {...getInputProps()} />
-              {!convertImg.img ? (
+              {!convertImg.preview ? (
                 <>
                   <div className='z-10 flex flex-col gap-3 items-center'>
                     {isDragActive && (
@@ -179,8 +228,7 @@ const Upload = () => {
                     </p>
                   </div>
                   <p className='absolute w-[70%] text-center bottom-3 text-xs text-gray-400'>
-                    Recommendation : Use .jpg format with high quality
-                    compression and file size under 20MB
+                    Max file sizes for images is 10MB and for videos is 100MB
                   </p>
                 </>
               ) : (
@@ -210,10 +258,15 @@ const Upload = () => {
                 </label>
                 <input
                   value={preUpload.name}
-                  onChange={(e) =>
-                    setPreUpload({ ...preUpload, name: e.target.value })
-                  }
-                  className='bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:outline-none focus:border-purp block w-full py-2.5 px-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:border-purp'
+                  onChange={(e) => {
+                    setPreUpload({ ...preUpload, name: e.target.value });
+                    setFormWarn({ ...formWarn, name: false });
+                  }}
+                  className={`bg-gray-50 border ${
+                    formWarn.name
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } text-gray-900 text-base rounded-lg focus:outline-none focus:border-purp block w-full py-2.5 px-4 dark:bg-gray-700 dark:text-white dark:focus:border-purp`}
                   required
                 />
               </div>
@@ -223,9 +276,9 @@ const Upload = () => {
                 </label>
                 <textarea
                   value={preUpload.description}
-                  onChange={(e) =>
-                    setPreUpload({ ...preUpload, description: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setPreUpload({ ...preUpload, description: e.target.value });
+                  }}
                   className='min-h-[200px] resize-none bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:outline-none focus:border-purp block w-full py-2.5 px-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:border-purp'
                   required
                 />
@@ -236,13 +289,18 @@ const Upload = () => {
                 </label>
                 <button
                   type='button'
-                  onClick={() =>
+                  onClick={() => {
                     setCategory({
                       ...category,
                       state: category.state ? false : true,
-                    })
-                  }
-                  className='bg-gray-50 border relative z-20 border-gray-300 text-gray-900 text-base flex justify-between items-center rounded-lg focus:outline-none focus:ring-purp focus:border-purp w-full py-2.5 px-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-purp dark:focus:border-purp'>
+                    });
+                    setFormWarn({ ...formWarn, category: false });
+                  }}
+                  className={`bg-gray-50 border relative z-20 ${
+                    formWarn.category
+                      ? "border-red-500"
+                      : "border-gray-300 dark:border-gray-600"
+                  } text-gray-900 text-base flex justify-between items-center rounded-lg focus:outline-none focus:border-purp w-full py-2.5 px-4 dark:bg-gray-700 dark:text-white dark:focus:ring-purp dark:focus:border-purp`}>
                   {category.text}
                   <span
                     className={`${
