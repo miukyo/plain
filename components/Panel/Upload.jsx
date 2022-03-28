@@ -48,8 +48,7 @@ const Upload = () => {
       const base = e.target.result;
       setPreUpload({
         ...preUpload,
-        // img: base.replace(/^data:image\/[a-z]+;base64,/, ""),
-        img: file,
+        img: base.replace(/^data:image\/[a-z]+;base64,/, ""),
       });
     };
     reader.readAsDataURL(file);
@@ -126,7 +125,7 @@ const Upload = () => {
       author: session?.user.name,
     });
   };
-  // console.log(preUpload);
+  console.log(preUpload);
   return (
     <div className='mt-[5rem] py-12 px-16 relative overflow-y-visible'>
       <div className='flex w-full justify-center'>
