@@ -6,11 +6,11 @@ export default async function uploadImg({ img }) {
     body.append("image", img);
     const res = await axios({
       method: "post",
-      body: body,
+      data: body,
       url: "https://api.imgur.com/3/image",
       headers: {
         Authorization: `Client-ID a4b77fdc42f4140`,
-        "Content-Type": "multipart/form-data",
+        ...body.getHeaders(),
       },
     });
     return res;
