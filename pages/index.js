@@ -29,7 +29,7 @@ export async function getServerSideProps(ctx) {
     method: "get",
     url: `${dev ? DEV_URL : PROD_URL}/api/posts`,
   });
-  let data = await response.json();
+  let data = await response.data;
 
   return {
     props: {

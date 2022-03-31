@@ -32,6 +32,7 @@ module.exports = {
       transitionProperty: {
         visibility: "visibility",
         dropdown: "visibility, opacity, transform, display",
+        loading: "width",
       },
     },
   },

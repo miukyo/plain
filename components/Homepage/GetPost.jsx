@@ -6,11 +6,21 @@ const GetPost = ({ posts }) => {
   let date = new Date(posts.createdAt);
   return (
     <div className='flex flex-col gap-2 p-3 h-fit rounded-xl border dark:bg-gray-800 dark:border-gray-700 overflow-hidden'>
-      <img className='rounded-xl w-full h-fit' src={posts.img.url} alt='' />
+      {posts.file.type !== /^image\/[a-z]+/ ? (
+        <img className='rounded-xl w-full h-fit' src={posts.file.link} alt='' />
+      ) : (
+        <video
+          className='rounded-xl w-full h-fit'
+          src={posts.file.link}
+          autoPlay={true}
+          muted={true}
+          loop={true}
+        />
+      )}
       <div>
         <div className='flex gap-1'>
           <p className='text-sm text-gray-400'>
-            Posted by <span className="text-purp">{posts.author}</span>
+            Posted by <span className='text-purp'>{posts.author}</span>
           </p>
         </div>
         <h1 className='text-lg font-semibold'>{posts.name}</h1>
@@ -20,7 +30,7 @@ const GetPost = ({ posts }) => {
       </div>
       <div className='flex gap-2 justify-between items-center'>
         <span className='text-sm text-gray-400'>
-          {date.toLocaleDateString('ID-id')}
+          {date.toLocaleDateString("ID-id")}
         </span>
         <span className='text-sm text-gray-400 flex items-center gap-1'>
           <AiOutlineEye />

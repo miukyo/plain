@@ -1,6 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
-import Router from "next/router";
-import axios  from "axios";
+import React, { useCallback, useState } from "react";
 import {
   BsThreeDots,
   BsPlus,
@@ -10,8 +8,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useDropzone } from "react-dropzone";
 import Link from "next/link";
-import uploadImg from "../../utils/method/uploadimg";
-import { ToastErr, ToastLoading, ToastSuccess } from "../Toasts";
+import { handleUpload } from "../method/uploadimg";
 
 const Upload = () => {
   const { data: session } = useSession();
@@ -35,102 +32,32 @@ const Upload = () => {
     img: false,
   });
   const [convertImg, setConvertImg] = useState({
-    img: null,
-    vid: null,
     preview: null,
   });
   const [preUpload, setPreUpload] = useState({
     name: "",
     img: null,
-    vid: null,
     description: "",
   });
   const onDrop = useCallback((e) => {
     const file = e[0];
-    const reader = new FileReader();
-    setFormWarn({ ...formWarn, img: false });
-    reader.onload = (e) => {
-      const base = e.target.result;
-      if (base.indexOf("image") !== -1) {
-        setPreUpload({
-          ...preUpload,
-          img: base.replace(/^data:image\/[a-z]+;base64,/, ""),
-        });
-        setConvertImg({
-          img: e.target.result,
-          preview: URL.createObjectURL(file),
-        });
-      } else {
-        setConvertImg({
-          vid: e.target.result,
-          preview: URL.createObjectURL(file),
-        });
-        setPreUpload({
-          ...preUpload,
-          vid: base.replace(/^data:video\/[a-z]+;base64,/, ""),
-        });
-      }
-    };
-    reader.readAsDataURL(file);
+    setPreUpload({
+      ...preUpload,
+      img: file,
+    });
+    setConvertImg({
+      preview: URL.createObjectURL(file),
+    });
   });
-  const handleUpload = async () => {
-    if (
-      (convertImg.preview !== null) &
-      (preUpload.name.length > 3 && preUpload.name.length < 100) &
-      (category.value !== null) &
-      (session !== null)
-    ) {
-      ToastLoading("Uploading...", { id: "Uploading" });
-      let data = await uploadImg({
-        img: preUpload.img,
-        vid: preUpload.vid,
-      });
-      if (data.status) {
-        ToastLoading("Finishing...", { id: "Uploading" });
-        let upload = {
-          file: data.data,
-          name: preUpload.name,
-          description: preUpload.description,
-          category: category.value,
-          author: session?.user.name,
-          likes: 0,
-          views: 0,
-          createdAt: new Date().toISOString(),
-        };
-        let final = await axios({
-          method: "POST",
-          url: "/api/posts",
-          data: JSON.stringify(upload),
-        })
-          .then((res) => res.json())
-          .then((res) => {
-            return res;
-          });
-        if (final.success) {
-          ToastSuccess("Uploaded", { id: "Uploading" });
-          Router.push("/");
-        } else {
-          ToastErr("Upload Failed (internal error)", { id: "Uploading" });
-        }
-      } else {
-        ToastErr("Upload Failed (internal error)", { id: "Uploading" });
-      }
-    } else {
-      if (convertImg.preview == null) {
-        ToastErr("Please insert an image or video!", { id: "Uploading" });
-        setFormWarn({ ...formWarn, img: true });
-      } else if (preUpload.name.length < 3 || preUpload.name.length > 100) {
-        ToastErr("Please insert the title between 3 to 100 character!", {
-          id: "Uploading",
-        });
-        setFormWarn({ ...formWarn, name: true });
-      } else if (category.value == null) {
-        ToastErr("Please select the category!", { id: "Uploading" });
-        setFormWarn({ ...formWarn, category: true });
-      } else if (session == null) {
-        ToastErr("Authentication Error", { id: "Uploading" });
-      }
-    }
+  const uploadButton = () => {
+    handleUpload({
+      file: preUpload.img,
+      preview: convertImg.preview,
+      name: preUpload.name,
+      category: category.value,
+      description: preUpload.description,
+      session: session,
+    });
   };
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -141,12 +68,10 @@ const Upload = () => {
   const handleClear = () => {
     setConvertImg({
       img: null,
-      vid: null,
       preview: null,
     });
     setPreUpload({
       ...preUpload,
-      vid: null,
       img: null,
     });
   };
@@ -163,7 +88,6 @@ const Upload = () => {
   //     author: session?.user.name,
   //   });
   // };
-  // console.log(preUpload);
   return (
     <div className='mt-[5rem] py-12 px-16 relative overflow-y-visible'>
       <div className='flex w-full justify-center'>
@@ -180,7 +104,7 @@ const Upload = () => {
               </Link>
               <button
                 type='submit'
-                onClick={handleUpload}
+                onClick={uploadButton}
                 className='px-5 py-2 font-medium tracking-wide text-white transition bg-purp rounded-md hover:bg-opacity-80 active:scale-90'>
                 Upload
               </button>
@@ -194,21 +118,12 @@ const Upload = () => {
               } ${
                 formWarn.img ? "border-red-500 border" : ""
               } relative w-[35rem] h-[40rem]  rounded-xl flex justify-center items-center overflow-hidden`}>
-              {convertImg.preview &&
-                (convertImg.img ? (
-                  <img
-                    className='absolute w-full rounded-xl'
-                    src={convertImg.preview}
-                  />
-                ) : (
-                  <video
-                    loop={true}
-                    autoPlay={true}
-                    muted={true}
-                    className='absolute w-full rounded-xl'
-                    src={convertImg.preview}
-                  />
-                ))}
+              {convertImg.preview && (
+                <img
+                  className='absolute w-full rounded-xl'
+                  src={convertImg.preview}
+                />
+              )}
               <input {...getInputProps()} />
               {!convertImg.preview ? (
                 <>
@@ -228,7 +143,7 @@ const Upload = () => {
                     </p>
                   </div>
                   <p className='absolute w-[70%] text-center bottom-3 text-xs text-gray-400'>
-                    Max file sizes for images is 10MB and for videos is 100MB
+                    Max file sizes for images is 10MB
                   </p>
                 </>
               ) : (
