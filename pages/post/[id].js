@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Post from "../../components/Post/Post";
 
-const post = () => {
+const Index = () => {
   const [id, setId] = useState();
   const [posts, setPosts] = useState();
   useEffect(() => {
@@ -26,4 +26,4 @@ const post = () => {
   return <>{posts && <Post posts={posts} />}</>;
 };
 
-export default post;
+export default Index;
