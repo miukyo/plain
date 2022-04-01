@@ -1,6 +1,6 @@
 import axios from "axios";
 import Router from "next/router";
-import { ToastErr, ToastLoading, ToastSuccess } from "../Toasts";
+import { ToastErr, ToastLoading, ToastSuccess } from "../components/Toasts";
 
 export async function handleUpload({
   file,
@@ -42,13 +42,9 @@ export async function handleUpload({
         views: 0,
         createdAt: new Date().toISOString(),
       };
+      ToastLoading("Finishing...", 0, { id: "Uploading" });
       let final = await axios({
         method: "POST",
-        onUploadProgress: (progressEvent) => {
-          const { loaded, total } = progressEvent;
-          const percent = Math.floor((loaded * 100) / total);
-          ToastLoading("Finishing...", percent, { id: "Uploading" });
-        },
         url: "/api/posts",
         data: upload,
       }).then((res) => {

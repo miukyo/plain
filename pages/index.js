@@ -14,26 +14,9 @@ export default function Home({ posts }) {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <main>
-        <Navbar />
-        <Homepage posts={posts} />
+        <Homepage />
       </main>
     </div>
   );
 }
 
-export async function getServerSideProps(ctx) {
-  let dev = process.env.NODE_ENV !== "production";
-  let { DEV_URL, PROD_URL } = process.env;
-
-  let response = await axios({
-    method: "get",
-    url: `${dev ? DEV_URL : PROD_URL}/api/posts`,
-  });
-  let data = await response.data;
-
-  return {
-    props: {
-      posts: data["message"],
-    },
-  };
-}

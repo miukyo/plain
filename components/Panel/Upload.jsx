@@ -8,22 +8,21 @@ import {
 import { useSession } from "next-auth/react";
 import { useDropzone } from "react-dropzone";
 import Link from "next/link";
-import { handleUpload } from "../method/uploadimg";
+import { handleUpload } from "../../utils/upload";
 
 const Upload = () => {
   const { data: session } = useSession();
   const categoryS = [
-    { id: 1, name: "Animation" },
-    { id: 2, name: "Illustration" },
-    { id: 3, name: "Banner" },
-    { id: 4, name: "UI/UX" },
-    { id: 5, name: "Overlay" },
-    { id: 6, name: "Typography" },
-    { id: 7, name: "Other" },
+    "Animation",
+    "Illustration",
+    "Banner",
+    "UI/UX",
+    "Overlay",
+    "Typography",
+    "Other",
   ];
   const [category, setCategory] = useState({
     text: "Select category",
-    value: null,
     state: false,
   });
   const [formWarn, setFormWarn] = useState({
@@ -54,7 +53,7 @@ const Upload = () => {
       file: preUpload.img,
       preview: convertImg.preview,
       name: preUpload.name,
-      category: category.value,
+      category: category.text,
       description: preUpload.description,
       session: session,
     });
@@ -237,12 +236,11 @@ const Upload = () => {
                         onClick={(e) => {
                           setCategory({
                             text: e.target.innerText,
-                            value: c,
                             state: false,
                           });
                         }}
                         className='py-2.5 px-4 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer'>
-                        {c.name}
+                        {c}
                       </li>
                     ))}
                   </ul>

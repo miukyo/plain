@@ -6,7 +6,6 @@ import Upload from "../components/Panel/Upload";
 export default function upload() {
   return (
     <>
-      <Navbar />
       <Upload />
     </>
   );
