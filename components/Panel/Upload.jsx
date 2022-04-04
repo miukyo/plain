@@ -55,7 +55,7 @@ const Upload = () => {
       name: preUpload.name,
       category: category.text,
       description: preUpload.description,
-      session: session,
+      session: session?.userId,
     });
   };
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -116,7 +116,7 @@ const Upload = () => {
                 !convertImg.preview && "bg-gray-300 dark:bg-gray-700"
               } ${
                 formWarn.img ? "border-red-500 border" : ""
-              } relative w-[35rem] h-[40rem]  rounded-xl flex justify-center items-center overflow-hidden`}>
+              } relative w-[35rem] h-[40rem] rounded-xl flex justify-center items-center overflow-hidden`}>
               {convertImg.preview && (
                 <img
                   className='absolute w-full rounded-xl'

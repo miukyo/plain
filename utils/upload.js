@@ -8,8 +8,9 @@ export async function handleUpload({
   name,
   category,
   description,
-  session,
-}) {
+  session
+})
+ {
   if (
     (preview !== null) &
     (name?.length > 3 && name?.length < 100) &
@@ -33,25 +34,24 @@ export async function handleUpload({
     });
     if (res.status) {
       let upload = {
-        file: res.data.data,
-        name: name,
+        title: name,
         description: description,
+        file: res.data.data,
         category: category,
-        author: session?.user.name,
-        likes: 0,
-        views: 0,
+        published: false,
         createdAt: new Date().toISOString(),
+        session: session,
       };
       ToastLoading("Finishing...", 0, { id: "Uploading" });
       let final = await axios({
         method: "POST",
-        url: "/api/posts",
+        url: "/api/post",
         data: upload,
       }).then((res) => {
         return res.data;
       });
-      if (final.success) {
-        ToastSuccess("Uploaded", { id: "Uploading" });
+      if (final) {
+        ToastSuccess("Post Uploaded!", { id: "Uploading" });
         Router.push("/");
       } else {
         ToastErr("Upload Failed (internal error) 2", { id: "Uploading" });

@@ -56,7 +56,7 @@ export const ToastLoading = (msg, progress, { id }) => {
           <p>{msg}</p>
         </div>
         <span
-          className='w-full h-1 absolute bottom-0 left-0 bg-purp transition-loading'
+          className='w-full h-[2px] absolute bottom-0 left-0 bg-purp transition-loading'
           style={{ width: `${progress}%` }}></span>
       </div>
     ),
