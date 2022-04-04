@@ -22,14 +22,14 @@ const GetPost = ({ posts }) => {
             </p>
           </div>
 
-          <h1 className='text-lg font-semibold break-words text-ellipsis line-clamp-2'>{posts.title}</h1>
+          <h1 className='text-lg font-semibold break-all text-ellipsis line-clamp-1'>{posts.title}</h1>
 
-          <p className='text-sm text-gray-400 break-words text-ellipsis line-clamp-4'>
+          {/* <p className='text-sm text-gray-400 break-words text-ellipsis line-clamp-4'>
             {posts.description}
-          </p>
+          </p> */}
         </div>
 
-        <div className='flex gap-2 justify-between items-center'>
+        <div className='flex gap-2 justify-between items-center -mt-2'>
           <span className='text-sm text-gray-400'>
             {moment(date).fromNow()}
           </span>
