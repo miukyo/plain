@@ -1,7 +1,8 @@
 import Prisma from "../../../utils/prisma";
 
 export default async function handle(req, res) {
-  const { title, description, file, category, published, createdAt, session } = req.body;
+  const { title, description, file, category, published, createdAt, session } =
+    req.body;
   const e = await Prisma.post.create({
     include: { author: true },
     data: {

@@ -1,7 +1,5 @@
 import React from "react";
-import { Toaster } from "react-hot-toast";
-import { Navbar } from "../components/Homepage/Navbar";
-import Upload from "../components/Panel/Upload";
+import Upload from "../components/Upload/Upload";
 
 export default function upload() {
   return (

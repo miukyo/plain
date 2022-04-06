@@ -7,25 +7,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import GetPost from "../components/Homepage/GetPost";
 import axios from "axios";
 
-export default function Home({ postsD }) {
+export default function Home({ feedD }) {
   const [posts, setPosts] = useState();
-  console.log(posts);
   const [category, setCategory] = useState();
   useEffect(() => {
-    setPosts(category ? category : postsD);
+    setPosts(category ? category : feedD);
   }, []);
   useEffect(() => {
     setPosts([]);
     setTimeout(async () => {
       if (category !== undefined) {
-        const e = await axios({
-          url: "/api/feed",
-          method: "post",
-          data: { category },
+        const filter = (feedD || []).filter((post) => {
+          return post.category === category;
         });
-        return setPosts(e.data);
+        return setPosts(filter);
       } else {
-        return setPosts(postsD);
+        return setPosts(feedD);
       }
     }, 10);
   }, [category]);
@@ -68,7 +65,7 @@ export default function Home({ postsD }) {
             </button>
           </div>
           {posts ? (
-            <div className='my-10 grid grid-cols-5 gap-3'>
+            <div className='my-10 grid grid-cols-4 gap-3'>
               {posts?.map((posts, i) => (
                 <motion.div
                   initial={{ opacity: 0, y: 100 }}
@@ -100,9 +97,9 @@ const Category = ({ name, category }) => {
 export const getServerSideProps = async () => {
   if (process.env.NODE_ENV === "development") {
     const res = await axios.get(`${process.env.DEV_URL}/api/feed`);
-    return { props: { postsD: res.data } };
+    return { props: { feedD: res.data } };
   } else {
     const res = await axios.get(`${process.env.PROD_URL}/api/feed`);
-    return { props: { postsD: res.data } };
+    return { props: { feedD: res.data } };
   }
 };
