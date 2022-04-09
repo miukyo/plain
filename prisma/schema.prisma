@@ -36,18 +36,19 @@ model Session {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String?        @unique
-  emailVerified DateTime?
-  image         String?
-  verified      Boolean        @default(false)
-  likesPost     Likes[]
-  post          Post[]
-  accounts      Account[]
-  sessions      Session[]
-  comments      Comments[]
-  userSettings  UserSettings[]
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  verified       Boolean         @default(false)
+  likesPost      Likes[]
+  post           Post[]
+  accounts       Account[]
+  sessions       Session[]
+  comments       Comments[]
+  userSettings   UserSettings[]
+  commentsReplay CommentsReply[]
 }
 
 model VerificationToken {
@@ -59,41 +60,62 @@ model VerificationToken {
 }
 
 model Post {
-  id          String     @id @default(cuid())
-  title       String
-  description String?
-  category    String
-  file        Json
-  comments    Comments[]
-  likes       Int?       @default(0)
-  views       Int?       @default(0)
-  authorId    String
-  author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  published   Boolean
-  likesBy     Likes[]
-  createdAt   DateTime?
-  updatedAt   DateTime?
+  id            String          @id @default(cuid())
+  title         String
+  description   String?         @db.LongText
+  category      String
+  file          Json
+  comments      Comments[]
+  likes         Int?            @default(0)
+  views         Int?            @default(0)
+  authorId      String
+  author        User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  published     Boolean
+  likesBy       Likes[]
+  createdAt     DateTime?
+  updatedAt     DateTime?
+  CommentsReply CommentsReply[]
 }
 
 model Likes {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   postId    String
   userId    String
   createdAt DateTime?
   updatedAt DateTime?
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Comments {
-  id        String   @id @default(cuid())
-  text      String
+  id        String          @id @default(cuid())
+  text      String          @db.LongText
+  reply     CommentsReply[]
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
   postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  createdAt DateTime
-  updatedAt DateTime
+  post      Post            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime?
+  updatedAt DateTime?
+
+  @@map("comments")
+}
+
+model CommentsReply {
+  id          String    @id @default(cuid())
+  text        String    @db.LongText
+  authorId    String
+  authorName  String
+  authorImage String
+  author      User      @relation(fields: [authorId, authorName, authorImage], references: [id, name, image], onDelete: Cascade)
+  postId      String
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String
+  comment     Comments  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime?
+  updatedAt   DateTime?
+
+  @@map("comments_replay")
 }
 
 model UserSettings {

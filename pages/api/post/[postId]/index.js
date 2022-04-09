@@ -1,5 +1,5 @@
 import axios from "axios";
-import Prisma from "../../../utils/prisma";
+import Prisma from "../../../../utils/prisma";
 
 export default async function handle(req, res) {
   switch (req.method) {
@@ -19,7 +19,10 @@ async function handleGet(req, res) {
   const { postId } = req.query;
   const e = await Prisma.post.findUnique({
     where: { id: postId },
-    include: { author: true, likesBy: true },
+    include: {
+      author: true,
+      likesBy: true,
+    },
   });
   res.json(e);
 }

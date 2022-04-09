@@ -17,6 +17,15 @@ export default NextAuth({
       session.userId = user.id;
       return Promise.resolve(session);
     },
+    async signIn({ profile, user }) {
+      return prisma.user.update({
+        where: { id: user.id },
+        data: {
+          image: profile.image_url,
+          name: profile.username,
+        },
+      });
+    },
   },
   adapter: PrismaAdapter(prisma),
   // ...add more providers here

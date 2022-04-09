@@ -73,7 +73,7 @@ export const Navbar = () => {
             <img
               className='rounded-full object-cover h-[40px] w-[40px] select-none'
               style={{ fontSize: "0" }}
-              src={session ? session?.user?.image : "pfp.webp"}
+              src={session ? session?.user?.image : "/pfp.webp"}
               alt='Profile Picture'></img>
           </button>
           <div
